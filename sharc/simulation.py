@@ -46,6 +46,8 @@ class Simulation(ABC, Observable):
             self.param_system = self.parameters.rns
         elif self.parameters.general.system == "RAS":
             self.param_system = self.parameters.ras
+        elif self.parameters.general.system == "ARNS":
+            self.param_system = self.parameters.arns
         else:
             sys.stderr.write("ERROR\nInvalid system: " + self.parameters.general.system)
             sys.exit(1)
@@ -109,6 +111,7 @@ class Simulation(ABC, Observable):
             not self.parameters.imt.interfered_with) or \
            (self.overlapping_bandwidth == self.parameters.imt.bandwidth and
             self.parameters.imt.interfered_with):
+            print(f"{__name__}: WARNING: Overlapping channels detected. Switched adjacent_channel to off")
 
             self.adjacent_channel = False
 
@@ -194,7 +197,8 @@ class Simulation(ABC, Observable):
              self.parameters.imt.topology == "INDOOR":
             elevation_angles = np.transpose(station_b.get_elevation(station_a))
         elif station_a.station_type is StationType.FSS_ES or \
-            station_a.station_type is StationType.RAS:
+            station_a.station_type is StationType.RAS or \
+            station_a.station_type is StationType.ARNS:
             elevation_angles = station_b.get_elevation(station_a)
         else:
             elevation_angles = None
@@ -205,7 +209,8 @@ class Simulation(ABC, Observable):
            station_a.station_type is StationType.HAPS or \
            station_a.station_type is StationType.FS or \
            station_a.station_type is StationType.RNS or \
-           station_a.station_type is StationType.RAS:
+           station_a.station_type is StationType.RAS or \
+           station_a.station_type is StationType.ARNS:
             # Calculate distance from transmitters to receivers. The result is a
             # num_station_a x num_station_b
             d_2D = station_a.get_distance_to(station_b)
@@ -380,7 +385,8 @@ class Simulation(ABC, Observable):
                  station_2.station_type is StationType.HAPS or \
                  station_2.station_type is StationType.FS or \
                  station_2.station_type is StationType.RNS or \
-                 station_2.station_type is StationType.RAS):
+                 station_2.station_type is StationType.RAS or \
+                 station_2.station_type is StationType.ARNS):
                 phi, theta = station_1.get_pointing_vector_to(station_2)
                 phi = np.repeat(phi,self.parameters.imt.ue_k,0)
                 theta = np.repeat(theta,self.parameters.imt.ue_k,0)
@@ -396,7 +402,8 @@ class Simulation(ABC, Observable):
              station_1.station_type is StationType.HAPS or \
              station_1.station_type is StationType.FS or \
              station_1.station_type is StationType.RNS or \
-             station_1.station_type is StationType.RAS):
+             station_1.station_type is StationType.RAS or \
+             station_1.station_type is StationType.ARNS):
             phi, theta = station_1.get_pointing_vector_to(station_2)
             beams_idx = np.zeros(len(station_2_active),dtype=int)
 
@@ -408,7 +415,8 @@ class Simulation(ABC, Observable):
            (station_1.station_type is StationType.IMT_BS and station_2.station_type is StationType.HAPS) or \
            (station_1.station_type is StationType.IMT_BS and station_2.station_type is StationType.FS) or \
            (station_1.station_type is StationType.IMT_BS and station_2.station_type is StationType.RNS) or \
-           (station_1.station_type is StationType.IMT_BS and station_2.station_type is StationType.RAS):
+           (station_1.station_type is StationType.IMT_BS and station_2.station_type is StationType.RAS) or \
+           (station_1.station_type is StationType.IMT_BS and station_2.station_type is StationType.ARNS):
             for k in station_1_active:
                 for b in range(k*self.parameters.imt.ue_k,(k+1)*self.parameters.imt.ue_k):
                     gains[b,station_2_active] = station_1.antenna[k].calculate_gain(phi_vec=phi[b,station_2_active],
@@ -422,7 +430,8 @@ class Simulation(ABC, Observable):
              (station_1.station_type is StationType.IMT_UE and station_2.station_type is StationType.HAPS) or \
              (station_1.station_type is StationType.IMT_UE and station_2.station_type is StationType.FS) or \
              (station_1.station_type is StationType.IMT_UE and station_2.station_type is StationType.RNS) or \
-             (station_1.station_type is StationType.IMT_UE and station_2.station_type is StationType.RAS):
+             (station_1.station_type is StationType.IMT_UE and station_2.station_type is StationType.RAS) or \
+             (station_1.station_type is StationType.IMT_UE and station_2.station_type is StationType.ARNS):
                for k in station_1_active:
                    gains[k,station_2_active] = station_1.antenna[k].calculate_gain(phi_vec=phi[k,station_2_active],
                                                                             theta_vec=theta[k,station_2_active],
@@ -438,7 +447,8 @@ class Simulation(ABC, Observable):
              station_1.station_type is StationType.FSS_ES or \
              station_1.station_type is StationType.HAPS or \
              station_1.station_type is StationType.FS or \
-             station_1.station_type is StationType.RAS:
+             station_1.station_type is StationType.RAS or \
+             station_1.station_type is StationType.ARNS:
 
             off_axis_angle = station_1.get_off_axis_angle(station_2)
             distance = station_1.get_distance_to(station_2)
