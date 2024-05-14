@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Parameters definitions for IMT systems
 """
+import configparser
 from dataclasses import dataclass
 
 from sharc.parameters.parameters_base import ParametersBase

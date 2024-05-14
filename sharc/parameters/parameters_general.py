@@ -1,4 +1,5 @@
-# -*- coding: utf-8 -*
+# -*- coding: utf-8 -*-
+import configparser
 from dataclasses import dataclass
 
 from sharc.sharc_definitions import SHARC_IMPLEMENTED_SYSTEMS
