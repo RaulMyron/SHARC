@@ -2,10 +2,11 @@
 /sharc/output/*.txt
 /sharc/output/*.png
 /sharc/output_*/*
+/sharc/.venv/*
+/sharc/.venc/*
 
 __pycache__
 .spyproject
-
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
